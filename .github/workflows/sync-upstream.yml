@@ -1,0 +1,32 @@
+name: Sync Upstream & Build
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release-custom
+          fetch-depth: 0
+
+      - name: Sync main with upstream
+        run: |
+          git remote add upstream https://github.com/iOfficeAI/AionUi.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main --ff-only
+          git push origin main
+
+      - name: Merge upstream into release-custom
+        run: |
+          git checkout release-custom
+          git merge main --no-edit
+          git push origin release-custom
